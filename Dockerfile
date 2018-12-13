@@ -1,15 +1,12 @@
-FROM golang:1.9 as golang
+FROM golang:1.11 as golang
 
-ADD . $GOPATH/src/github.com/lekspyl/logstash_exporter/
-RUN curl -fsSL -o /usr/local/bin/dep https://github.com/golang/dep/releases/download/v0.3.2/dep-linux-amd64 && \
-        chmod +x /usr/local/bin/dep && \
-        go get -u github.com/lekspyl/logstash_exporter && \
-        cd $GOPATH/src/github.com/lekspyl/logstash_exporter && \
-        dep ensure && \
-        make
+ADD . $GOPATH/github.com/lekspyl/logstash_exporter/
+
+WORKDIR $GOPATH/github.com/lekspyl/logstash_exporter
+RUN make
 
 FROM busybox:1.27.2-glibc
-COPY --from=golang /go/src/github.com/lekspyl/logstash_exporter/logstash_exporter /
+COPY --from=golang /go/github.com/lekspyl/logstash_exporter/logstash_exporter /
 LABEL maintainer lex.pilipenko@gmail.com
 EXPOSE 9198
 ENTRYPOINT ["/logstash_exporter"]  
